@@ -1,0 +1,85 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: edgy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-edgy}
+      POSTGRES_USER: ${POSTGRES_USER:-edgy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edgy123}
+      TZ: ${TIMEZONE:-UTC}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: mount schema so you can apply it from a container
+      - ../database:/database:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-edgy} -d ${POSTGRES_DB:-edgy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - edgy
+
+  node-red:
+    image: nodered/node-red:latest
+    container_name: edgy-nodered
+    restart: unless-stopped
+    environment:
+      TZ: ${TIMEZONE:-UTC}
+    ports:
+      - "1880:1880"
+    volumes:
+      # Persist flows/credentials/settings
+      - nodered_data:/data
+      # Optional: keep flows in repo and copy/import manually
+      - ../node-red:/repo-node-red:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - edgy
+
+  # OPTIONAL (recommended): one-shot DB bootstrap.
+  # Run once (or whenever you update schema): `docker compose run --rm db-init`
+  db-init:
+    image: postgres:16
+    container_name: edgy-db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-edgy123}
+      POSTGRES_DB: ${POSTGRES_DB:-edgy}
+      POSTGRES_USER: ${POSTGRES_USER:-edgy}
+    volumes:
+      - ../database:/database:ro
+    entrypoint: ["bash", "-lc"]
+    command: >
+      "
+      echo 'Applying schema...';
+      psql -h postgres -U ${POSTGRES_USER:-edgy} -d ${POSTGRES_DB:-edgy} -v ON_ERROR_STOP=1
+      -f /database/schema/00_extensions.sql
+      -f /database/schema/01_sites.sql
+      -f /database/schema/02_device_specs.sql
+      -f /database/schema/03_telemetry.sql
+      -f /database/schema/04_forecasts.sql
+      -f /database/schema/05_profiles.sql
+      -f /database/schema/06_canonical_points.sql
+      -f /database/schema/07_point_mappings.sql
+      -f /database/schema/08_asset_relations.sql
+      ;
+      echo 'Done.'
+      "
+    networks:
+      - edgy
+    profiles: ["init"]
+
+volumes:
+  postgres_data:
+  nodered_data:
+
+networks:
+  edgy:
+    driver: bridge
