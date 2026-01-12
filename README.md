@@ -12,8 +12,6 @@ The system is designed to be:
 - Canonical-data driven
 - Easy to extend by non-software engineers
 
----
-
 ## Architecture Overview
 Victron GX / MQTT
 ↓
@@ -31,8 +29,6 @@ Key concepts:
 - 15-minute resolution (default)
 - Canonical point names across all sources
 
----
-
 ## Requirements
 
 ### Hardware
@@ -45,16 +41,12 @@ Key concepts:
 - Docker Compose
 - Git
 
----
-
 ## Clone the Repository
 
 ```bash
 git clone https://github.com/<your-username>/edgy-energy-platform.git
 cd edgy-energy-platform
 ```
-
----
 
 ## Environment Variables
 Copy the example file:
