@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS device_specs (
 
   vendor        TEXT,
   model         TEXT,
-  fw_version    TEXT,
 
   profile_hint  TEXT,                   -- e.g. edgy.asset.battery.v1
   last_seen     TIMESTAMPTZ,
