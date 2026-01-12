@@ -14,13 +14,21 @@ The system is designed to be:
 
 ## Architecture Overview
 Victron GX / MQTT
+
 ↓
+
 Node-RED (Edge)
+
 ↓
+
 PostgreSQL (Edge DB)
+
 ↓
+
 (Optional sync to Cloud DB)
+
 ↓
+
 Optimization / Analytics
 
 
