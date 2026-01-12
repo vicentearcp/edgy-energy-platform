@@ -100,18 +100,10 @@ docker exec -it edgy-postgres psql -U edgy -d edgy
 
 Run schema scripts in order:
 ```sql
-\i database/schema/01_sites.sql
+\i database/schema/01_measurement_live.sql
 \i database/schema/02_device_specs.sql
-\i database/schema/03_telemetry.sql
-\i database/schema/04_forecasts.sql
-\i database/schema/05_profiles.sql
-\i database/schema/06_point_mappings.sql
-\i database/schema/07_asset_relations.sql
-```
-
-Seed canonical profiles:
-```sql
-\i database/seeds/profiles_seed.sql
+\i database/schema/03_mapping_rules.sql
+\i database/schema/04_asset_relations.sql
 ```
 
 ## Load Node-RED Flows
