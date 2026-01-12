@@ -1,0 +1,420 @@
+[
+    {
+        "id": "50308b8fb0dc9c2e",
+        "type": "tab",
+        "label": "Flow 3 (Fixed MQTT→Canonical→DB)",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8e1dbba4507519bd",
+        "type": "mqtt in",
+        "z": "50308b8fb0dc9c2e",
+        "name": "MQTT-SoC",
+        "topic": "N/c0619ab765bf/battery/279/Soc",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "4f5e25416b8f962f",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "e777ac4e7ad00dfd",
+                "da8a53c0bf979f3a"
+            ]
+        ]
+    },
+    {
+        "id": "1117b77f8bb2e350",
+        "type": "mqtt in",
+        "z": "50308b8fb0dc9c2e",
+        "name": "MQTT-SiteLoad",
+        "topic": "N/c0619ab765bf/vebus/276/Ac/Out/P",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "4f5e25416b8f962f",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "42568c62b7af1acf",
+                "2b6677383fdce785"
+            ]
+        ]
+    },
+    {
+        "id": "7d1319bc4e7669c6",
+        "type": "mqtt in",
+        "z": "50308b8fb0dc9c2e",
+        "name": "MQTT-PV",
+        "topic": "N/c0619ab765bf/solarcharger/278/Pv/Power",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "4f5e25416b8f962f",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 280,
+        "wires": [
+            [
+                "9dabe346cd230165",
+                "36e09238702e03d4"
+            ]
+        ]
+    },
+    {
+        "id": "e777ac4e7ad00dfd",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug 1 (raw mqtt SoC msg)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 260,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "42568c62b7af1acf",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug 2 (raw mqtt Load msg)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 270,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "9dabe346cd230165",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug 3 (raw mqtt PV msg)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 250,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "da8a53c0bf979f3a",
+        "type": "json",
+        "z": "50308b8fb0dc9c2e",
+        "name": "JSON parse SoC payload",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "5a6af6ea9b6ef3a8"
+            ]
+        ]
+    },
+    {
+        "id": "2b6677383fdce785",
+        "type": "json",
+        "z": "50308b8fb0dc9c2e",
+        "name": "JSON parse Load payload",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 380,
+        "y": 180,
+        "wires": [
+            [
+                "5a6af6ea9b6ef3a8"
+            ]
+        ]
+    },
+    {
+        "id": "36e09238702e03d4",
+        "type": "json",
+        "z": "50308b8fb0dc9c2e",
+        "name": "JSON parse PV payload",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 370,
+        "y": 280,
+        "wires": [
+            [
+                "5a6af6ea9b6ef3a8"
+            ]
+        ]
+    },
+    {
+        "id": "5a6af6ea9b6ef3a8",
+        "type": "function",
+        "z": "50308b8fb0dc9c2e",
+        "name": "victron2canonical (COMPLETE)",
+        "func": "const SITE_ID = \"TEST-SITE-EDGY\";\nconst topic = msg.topic;\n\n// payload already parsed by JSON node: {value: ...}\nconst obj = msg.payload;\nconst v = (obj && typeof obj === \"object\" && \"value\" in obj) ? obj.value : obj;\nlet value = Number(v);\nif (Number.isNaN(value)) return null;\n\n// Decide device_id based on topic\nlet device_id = null;\nif (topic.includes(\"/battery/279/\")) device_id = \"victron_battery_279\";\nelse if (topic.includes(\"/vebus/276/\")) device_id = \"victron_vebus_276\";\nelse if (topic.includes(\"/solarcharger/278/\")) device_id = \"victron_solar_278\";\nelse return null;\n\n// Topic -> canonical name + raw unit\nlet name = null;\nlet unit = null;\n\nif (topic === \"N/c0619ab765bf/battery/279/Soc\") {\n  name = \"battery_soc_pct\";\n  unit = \"%\";\n} else if (topic === \"N/c0619ab765bf/vebus/276/Ac/Out/P\") {\n  name = \"site_load_kw\";\n  unit = \"W\";   // Victron power topics typically W\n} else if (topic === \"N/c0619ab765bf/solarcharger/278/Pv/Power\") {\n  name = \"pv_ac_power_kw\";\n  unit = \"W\";   // typically W\n} else {\n  return null;\n}\n\n// Normalize units to kW where applicable\nif (unit === \"W\" && name.endsWith(\"_kw\")) {\n  value = value / 1000.0;\n  unit = \"kW\";\n}\n\n// Bucket timestamp to 15-min so ON CONFLICT is stable\nconst now = new Date();\nconst bucketMs = 15 * 60 * 1000;\nconst ts = new Date(Math.floor(now.getTime() / bucketMs) * bucketMs).toISOString();\n\nmsg.payload = {\n  site_id: SITE_ID,\n  device_id,\n  time: ts,\n  name,\n  value,\n  unit,\n  quality: \"good\"\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 180,
+        "wires": [
+            [
+                "4b016ce5f2a73c7a",
+                "d50f6b5f5afae0b8",
+                "a7318aa1244c7448"
+            ]
+        ]
+    },
+    {
+        "id": "4b016ce5f2a73c7a",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug 6 (canonical point)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "d50f6b5f5afae0b8",
+        "type": "function",
+        "z": "50308b8fb0dc9c2e",
+        "name": "build_sql_telemetry (topic+payload params)",
+        "func": "const p = msg.payload;\nif (!p || p.value === null || p.value === undefined) return null;\n\nconst sql = `\nINSERT INTO measurement_live (ts, site_id, device_id, point_name, value, unit, quality)\nVALUES ($1,$2,$3,$4,$5,$6,$7)\nON CONFLICT (ts, site_id, device_id, point_name)\nDO UPDATE SET value=EXCLUDED.value, unit=EXCLUDED.unit, quality=EXCLUDED.quality\nRETURNING ts, site_id, device_id, point_name, value;\n`;\n\nconst params = [p.time, p.site_id, p.device_id, p.name, p.value, p.unit, p.quality];\n\n// Style A (many postgres nodes expect this)\nmsg.query  = sql;\nmsg.params = params;\n\n// Style B (some postgres nodes expect this)\nmsg.topic   = sql;\nmsg.payload = params;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 200,
+        "wires": [
+            [
+                "dc2860f9f3783deb",
+                "1f68da8215e8fdae"
+            ]
+        ]
+    },
+    {
+        "id": "dc2860f9f3783deb",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug 7 (telemetry sql msg)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "1f68da8215e8fdae",
+        "type": "postgresql",
+        "z": "50308b8fb0dc9c2e",
+        "name": "Postgres: upsert telemetry",
+        "query": "",
+        "postgreSQLConfig": "9dfcb02b176459cc",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 1180,
+        "y": 220,
+        "wires": [
+            [
+                "dafa3ef4e6af6d89"
+            ]
+        ]
+    },
+    {
+        "id": "dafa3ef4e6af6d89",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug 8 (telemetry result)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1400,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "a7318aa1244c7448",
+        "type": "function",
+        "z": "50308b8fb0dc9c2e",
+        "name": "upsert_device_from_point (topic+payload params)",
+        "func": "const p = msg.payload;\nif (!p) return null;\n\nconst protocol = \"victron_mqtt\";\nconst address = \"tcp://192.168.1.19:1883\";\n\nconst vendor = \"Victron\";\nconst model = null;\nconst fw = null;\nconst profileHint = null;\n\nconst metaPatch = {\n  last_point: p.name,\n  last_unit: p.unit,\n  source: \"node-red\",\n  updated_at: new Date().toISOString()\n};\n\nconst sql = `\nINSERT INTO device_specs (\n  site_id, device_id,\n  protocol, address,\n  vendor, model, fw_version,\n  profile_hint,\n  last_seen, status,\n  meta\n)\nVALUES (\n  $1, $2,\n  $3, $4,\n  $5, $6, $7,\n  $8,\n  NOW(), 'online',\n  $9::jsonb\n)\nON CONFLICT (site_id, device_id)\nDO UPDATE SET\n  last_seen = NOW(),\n  status = 'online',\n  protocol = COALESCE(NULLIF(device_specs.protocol,''), EXCLUDED.protocol),\n  address  = COALESCE(NULLIF(device_specs.address,''),  EXCLUDED.address),\n  vendor   = COALESCE(device_specs.vendor,   EXCLUDED.vendor),\n  model    = COALESCE(device_specs.model,    EXCLUDED.model),\n  fw_version = COALESCE(device_specs.fw_version, EXCLUDED.fw_version),\n  profile_hint = COALESCE(device_specs.profile_hint, EXCLUDED.profile_hint),\n  meta = devices.meta || EXCLUDED.meta\nRETURNING site_id, device_id, last_seen, status;\n`;\n\nconst params = [\n  p.site_id,\n  p.device_id,\n  protocol,\n  address,\n  vendor,\n  model,\n  fw,\n  profileHint,\n  JSON.stringify(metaPatch)\n];\n\nmsg.topic = sql;\nmsg.payload = params;\n\nmsg.topic = msg.query;\nmsg.payload = msg.params;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 300,
+        "wires": [
+            [
+                "7563dabfb0ffd0e0",
+                "e0a79b35f1e98d46"
+            ]
+        ]
+    },
+    {
+        "id": "7563dabfb0ffd0e0",
+        "type": "postgresql",
+        "z": "50308b8fb0dc9c2e",
+        "name": "Postgres: upsert devices",
+        "query": "",
+        "postgreSQLConfig": "9dfcb02b176459cc",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 1180,
+        "y": 300,
+        "wires": [
+            [
+                "a40f79a4d4e9a8ca"
+            ]
+        ]
+    },
+    {
+        "id": "e0a79b35f1e98d46",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug (devices sql msg)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1210,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "a40f79a4d4e9a8ca",
+        "type": "debug",
+        "z": "50308b8fb0dc9c2e",
+        "name": "debug (devices result)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1410,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "4f5e25416b8f962f",
+        "type": "mqtt-broker",
+        "name": "victron-test",
+        "broker": "192.168.1.19",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "9dfcb02b176459cc",
+        "type": "postgreSQLConfig",
+        "name": "",
+        "host": "edgy-postgres",
+        "hostFieldType": "str",
+        "port": 5432,
+        "portFieldType": "num",
+        "database": "edgy",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": 10,
+        "maxFieldType": "num",
+        "idle": 1000,
+        "idleFieldType": "num",
+        "connectionTimeout": 10000,
+        "connectionTimeoutFieldType": "num",
+        "user": "edgy",
+        "userFieldType": "str",
+        "password": "edgy123",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "b554fe833429ba92",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-postgresql": "0.15.4"
+        }
+    }
+]
