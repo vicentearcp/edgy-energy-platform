@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS asset_relations(
+  parent_asset_id,
+  child_asset_id,
+  relation_type
+);
