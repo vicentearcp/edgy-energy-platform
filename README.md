@@ -52,7 +52,7 @@ Key concepts:
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/edgy-energy-platform.git
+git clone https://github.com/vicentearcp/edgy-energy-platform.git
 cd edgy-energy-platform
 ```
 
