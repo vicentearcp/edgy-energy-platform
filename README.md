@@ -113,11 +113,10 @@ Run schema scripts in order:
 4. Deploy
 
 ## Data Model Rules
-- **telemetry** → measured values only
-- **forecasts** → predicted values
+- **measurement_live** → measured values only
 - **device_specs** → static + semi-static config
-- **profiles** → canonical definitions
-- **point_mappings** → vendor → canonical mapping
+- **mapping_rules** → vendor → canonical mapping
+- **asset_relations** → how oe asset is related to the other 
 Full details: *docs/data-model.md*
 
 ## Supported Integrations
@@ -128,7 +127,7 @@ Full details: *docs/data-model.md*
 ## Development Workflow
 - Add new devices → *device_specs*
 - Add new points → *profiles*
-- Add new mappings → *point_mappings*
+- Add new mappings → *mapping_rules*
 - Extend Node-RED via function library
 
 ## Contributing
